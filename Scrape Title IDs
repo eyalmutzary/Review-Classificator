@@ -1,0 +1,50 @@
+import requests
+from bs4 import BeautifulSoup
+import os.path
+import pandas as pd
+
+def existed(title):
+    if df['Title'].str.contains(title).any():
+        return True
+    return False
+
+
+def write_movies (df):
+    # Writing to the csv file
+    path = 'D:\Machine Learning A-Z\Machine Learning Datasets'
+    complete_name = os.path.join(path, 'Movie_list.csv')
+    with open(complete_name, 'w', encoding="utf-8") as csvFile:
+        try:
+            csvFile.write(df.to_csv())
+            print("File written")
+        except Exception as e:
+            print('Failed to write a file: ' + str(e))
+
+
+def get_title_id(urls):
+    print(len(urls))
+    count = 0
+    for url in urls:
+        print(count)
+        count+=1
+        res = requests.get(url)
+        # Using beautifulSoup
+        soup = BeautifulSoup(res.content, "html.parser")
+        for i in soup.find("div", {"class": "lister-list"}):
+            try:
+                title = str(i.contents[3].a)[16:25]
+                if not existed(title):
+                    df.loc[len(df)] = title
+            except:
+                continue
+        print("done")
+
+
+urls = []
+for i in range(1,20001, 50):
+    urls.append('https://www.imdb.com/search/title?genres=action&view=simple&start='+str(i)+'&explore=title_type,genres&ref_=adv_nxt')
+labels = ['Title']
+df = pd.DataFrame(columns=labels)
+get_title_id(urls)
+print(df)
+write_movies(df)
