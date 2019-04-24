@@ -1,0 +1,34 @@
+st = "Wow Amazing awsome great"
+
+# Cleaning the texts
+import re
+# toolkit to filter the unnecessary words 
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+# library used to clean each word (loved --> love)
+from nltk.stem.porter import PorterStemmer
+corpus = []
+# clean the comment so only the words remain (^ means stay)
+comment = re.sub('[^a-zA-Z]', ' ', st)
+comment = comment.lower()
+# split the sentence to a list and filter it. we use set because its much faster
+comment = comment.split()
+ps = PorterStemmer()
+comment = [ps.stem(word) for word in comment if not word in set(stopwords.words('english'))]
+comment = ' '.join(comment)
+corpus.append(comment)
+
+
+from sklearn.externals import joblib 
+cv = joblib.load('cv_file.sav')
+New_test = cv.transform(corpus).toarray()
+
+
+# load the model from disk
+loaded_model = joblib.load('finalized_model.sav')
+result = loaded_model.score(New_test, [1])
+if result == 1:
+    print("Positive review")
+else:
+    print("Negative review")
